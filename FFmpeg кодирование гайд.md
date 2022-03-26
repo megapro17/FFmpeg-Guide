@@ -8,7 +8,8 @@
 
 При использовании 10 бит, видео будет сжиматься лучше, даже если исходный был в 8 бит. Но немного дольше кодируется видео, и может не поддерживать видеокарта (H.264 и VP9 никто не поддерживает, H.265 часто встречается, AV1 если есть в видеокарте, то обязан поддерживать) Это из-за того, что при сжатии значения округляются, а для 10 бит будет меньше ошибки. Он включается параметром `-pix_fmt yuv420p10le`, а 8 бит это `-pix_fmt yuv420p`.
 
-Перед `-i` можно всегда писать `-hwaccel auto`, чтобы исходное видео декодировалось на видеокарте, будет немного быстрее. Возможные варианты глянуть `ffmpeg -hwaccels`
+`-hwaccel` лучше не использовать, он может [ухудшить качество видео](https://mpv.io/manual/master/#video), и скорее сделает только медленее.
+
 
 **Лайфхак:** Для записи рабочего стола можно выбрать в OBS `yuv444p` `yuv444p10le`, текст выглядит намного лучше.
 
@@ -70,7 +71,7 @@ https://trac.ffmpeg.org/wiki/Encode/H.264
 CRF:
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx264 -crf 30 -preset slow "out.mkv"
+ffmpeg -i "1.mkv" -c:v libx264 -crf 30 -preset slow "out.mkv"
 ```
 
 Битрейт:
@@ -78,8 +79,8 @@ ffmpeg -hwaccel auto -i "1.mkv" -c:v libx264 -crf 30 -preset slow "out.mkv"
 Можно написать чтобы первый проход был качественее -fastfirstpass false
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx264 -b:v 5000k -preset slow -pass 1 -an -f null -
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx264 -b:v 5000k -preset slow -pass 2 "out.mkv"
+ffmpeg -i "1.mkv" -c:v libx264 -b:v 5000k -preset slow -pass 1 -an -f null -
+ffmpeg -i "1.mkv" -c:v libx264 -b:v 5000k -preset slow -pass 2 "out.mkv"
 ```
 
 ## H.265
@@ -91,7 +92,7 @@ https://trac.ffmpeg.org/wiki/Encode/H.265
 CRF:
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx265 -crf 30 -preset medium -pix_fmt yuv420p10le "out.mkv"
+ffmpeg -i "1.mkv" -c:v libx265 -crf 30 -preset medium -pix_fmt yuv420p10le "out.mkv"
 ```
 
 Битрейт:
@@ -99,8 +100,8 @@ ffmpeg -hwaccel auto -i "1.mkv" -c:v libx265 -crf 30 -preset medium -pix_fmt yuv
 Можно написать чтобы первый проход был побыстрее `-x265-params pass=1:no-slow-firstpass=1`
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx265 -b:v 5000k -preset medium -pix_fmt yuv420p10le -x265-params pass=1 -an -f null -
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libx265 -b:v 5000k -preset medium -pix_fmt yuv420p10le -x265-params pass=2 "out.mkv"
+ffmpeg -i "1.mkv" -c:v libx265 -b:v 5000k -preset medium -pix_fmt yuv420p10le -x265-params pass=1 -an -f null -
+ffmpeg -i "1.mkv" -c:v libx265 -b:v 5000k -preset medium -pix_fmt yuv420p10le -x265-params pass=2 "out.mkv"
 ```
 
 ## VP9
@@ -118,17 +119,17 @@ https://www.reddit.com/r/AV1/comments/k7colv/encoder_tuning_part_1_tuning_libvpx
 CRF:
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -crf 30 -b:v 0 -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 1 -an -f null -
+ffmpeg -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -crf 30 -b:v 0 -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 1 -an -f null -
 
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -crf 30 -b:v 0 -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 2 "out.webm"
+ffmpeg -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -crf 30 -b:v 0 -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 2 "out.webm"
 ```
 
 Битрейт:
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -b:v 5000k -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 1 -an -f null -
+ffmpeg -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -b:v 5000k -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 1 -an -f null -
 
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -b:v 5000k -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 2 "out.webm"
+ffmpeg -i "1.mkv" -c:v libvpx-vp9 -quality good -cpu-used 4 -b:v 5000k -pix_fmt yuv420p -lag-in-frames 25 -tile-columns 2 -tile-rows 0 -threads 8 -row-mt 1 -auto-alt-ref 1 -enable-tpl 1 -pass 2 "out.webm"
 ```
 
 ## AV1
@@ -144,14 +145,14 @@ https://www.reddit.com/r/AV1/comments/t59j32/encoder_tuning_part_4_a_2nd_generat
 libaom-av1 кодирует медленно, но сжимает очень качественно, лучший из лучших.
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libaom-av1 -quality good -cpu-used 4 -crf 24 -b:v 0 -pix_fmt yuv420p10le -lag-in-frames 35 -tile-columns 2 -tile-rows 0 -threads 8 -aom-params enable-qm=1:enable-chroma-deltaq=1:quant-b-adapt=1 -pass 1 -an -f null -
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libaom-av1 -quality good -cpu-used 4 -crf 24 -b:v 0 -pix_fmt yuv420p10le -lag-in-frames 35 -tile-columns 2 -tile-rows 0 -threads 8 -aom-params enable-qm=1:enable-chroma-deltaq=1:quant-b-adapt=1 -pass 2 "out.webm"
+ffmpeg -i "1.mkv" -c:v libaom-av1 -quality good -cpu-used 4 -crf 24 -b:v 0 -pix_fmt yuv420p10le -lag-in-frames 35 -tile-columns 2 -tile-rows 0 -threads 8 -aom-params enable-qm=1:enable-chroma-deltaq=1:quant-b-adapt=1 -pass 1 -an -f null -
+ffmpeg -i "1.mkv" -c:v libaom-av1 -quality good -cpu-used 4 -crf 24 -b:v 0 -pix_fmt yuv420p10le -lag-in-frames 35 -tile-columns 2 -tile-rows 0 -threads 8 -aom-params enable-qm=1:enable-chroma-deltaq=1:quant-b-adapt=1 -pass 2 "out.webm"
 ```
 
 libsvtav1 иногда может сжать качественее и быстрее x265, но скорее нет и требует пердолинга.
 
 ```powershell
-ffmpeg -hwaccel auto -i "1.mkv" -c:v libsvtav1 -preset 12 -pix_fmt yuv420p10le -crf 50 -svtav1-params tune=0:scd=1:irefresh-type=1 svt.mkv
+ffmpeg -i "1.mkv" -c:v libsvtav1 -preset 12 -pix_fmt yuv420p10le -crf 50 -svtav1-params tune=0:scd=1:irefresh-type=1 svt.mkv
 ```
 
 ## Аудио
